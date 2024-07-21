@@ -7,6 +7,7 @@ public class PlayerMovement : MonoBehaviour
     // General variables
     [SerializeField] private int defaultGravity;
     private Rigidbody2D rb;
+    private Animator ani;
 
     // Variables for movement
     [SerializeField] private int speed;
@@ -27,6 +28,7 @@ public class PlayerMovement : MonoBehaviour
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        ani = GetComponent<Animator>();
     }
 
     private void Update()
@@ -61,6 +63,11 @@ public class PlayerMovement : MonoBehaviour
         //if (rb.velocity.x < 0) transform.rotation = Quaternion.Euler(0, 180, 0);
         // When walking forwards unflip
         //else if (rb.velocity.x > 0) transform.rotation = Quaternion.identity;
+
+        ani.SetBool("Punch", Input.GetButtonDown("Punch"));
+        ani.SetBool("Kick", Input.GetButtonDown("Kick"));
+        ani.SetBool("Slash", Input.GetButtonDown("Jump")); //Don't forget to change later!!!
+        ani.SetBool("Heavy Slash", Input.GetButtonDown("Heavy Slash"));
     }
 
     private bool IsGrounded()
