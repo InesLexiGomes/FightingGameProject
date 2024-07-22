@@ -20,6 +20,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float maxJumpTime;
     private float jumpTime;
 
+    private float deltaY;
+
     // Variables for IsGrounded method
     [SerializeField] private Transform groundCheck;
     [SerializeField] private float groundCheckRadius;
@@ -41,15 +43,18 @@ public class PlayerMovement : MonoBehaviour
         currentVelocity.x = deltaX * speed;
         //if (Input.GetButton("Sprint")) currentVelocity.x *= sprintMultiplier;
 
+        deltaY = Input.GetAxis("Vertical");
+
+
         // While the player is grounded they can jump
-        if ((Input.GetButtonDown("Jump")) && IsGrounded())
+        if ((deltaY > 0) && IsGrounded())
         {
             currentVelocity.y = jumpSpeed;
             rb.gravityScale = 1.0f;
             jumpTime = Time.time;
         }
         // Add a bit more to the jump if the player holds the jump button after jumping
-        else if ((Input.GetButton("Jump")) && ((Time.time - jumpTime) < maxJumpTime))
+        else if ((deltaY > 0) && ((Time.time - jumpTime) < maxJumpTime))
         {
             rb.gravityScale = 1.0f;
         }
@@ -66,7 +71,7 @@ public class PlayerMovement : MonoBehaviour
 
         ani.SetBool("Punch", Input.GetButtonDown("Punch"));
         ani.SetBool("Kick", Input.GetButtonDown("Kick"));
-        ani.SetBool("Slash", Input.GetButtonDown("Jump")); //Don't forget to change later!!!
+        ani.SetBool("Slash", Input.GetButtonDown("Slash"));
         ani.SetBool("Heavy Slash", Input.GetButtonDown("Heavy Slash"));
     }
 
