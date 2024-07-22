@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerMovement : MonoBehaviour
+public class PlaceholderMovement : MonoBehaviour
 {
     // General variables
     [SerializeField] private int defaultGravity;
@@ -11,9 +11,17 @@ public class PlayerMovement : MonoBehaviour
 
     // Variables for movement
     [SerializeField] private int speed;
-    [SerializeField] private float sprintMultiplier;
     private Vector2 currentVelocity;
     private float deltaX;
+
+    // Variables for dashing, air dashing and double jumping
+    [SerializeField] private float dashMultiplier;
+    [SerializeField] private float maxBufferTime;
+    private float dashBufferTime = 0;
+    private bool horizontalBuffer;
+    private bool dashBuffer;
+    private bool isDashing;
+
 
     // Variables for jumping
     [SerializeField] private int jumpSpeed;
@@ -40,11 +48,43 @@ public class PlayerMovement : MonoBehaviour
 
         // Determines velocity based on a fixed speed value and the horizontal movement input
         deltaX = Input.GetAxis("Horizontal");
+
+        // Check if horizontal input is positive
+        if (Input.GetAxisRaw("Horizontal") > 0)
+        {
+            // Dash when both buffers are true
+            if (horizontalBuffer && dashBuffer) isDashing = true;
+
+            // Otherwise set first buffer to true and start timer
+            else
+            {
+                horizontalBuffer = true;
+                dashBufferTime = maxBufferTime;
+            }
+        }
+
+        // If horizontal input is 0 stop dashing and set second buffer to true
+        else if (Input.GetAxisRaw("Horizontal") == 0)
+        {
+            isDashing = false;
+            dashBuffer = true;
+        }
+
+        // Decrease time from Buffer by time that has passed
+        dashBufferTime -= Time.deltaTime;
+        if (dashBufferTime <= 0)
+        {
+            horizontalBuffer = false;
+            dashBuffer = false;
+            dashBufferTime = 0;
+        }
+
         currentVelocity.x = deltaX * speed;
-        //if (Input.GetButton("Sprint")) currentVelocity.x *= sprintMultiplier;
+
+        // When dashing increase speed
+        if (isDashing) currentVelocity.x *= dashMultiplier;
 
         deltaY = Input.GetAxis("Vertical");
-
 
         // While the player is grounded they can jump
         if ((deltaY > 0) && IsGrounded())

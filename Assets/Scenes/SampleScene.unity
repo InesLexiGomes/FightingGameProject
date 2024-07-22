@@ -1667,7 +1667,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   defaultGravity: 3
   speed: 6
-  sprintMultiplier: 1.5
+  dashMultiplier: 1.5
+  maxBufferTime: 0.5
+  horizontalBuffer: 0
+  dashBuffer: 0
+  isDashing: 0
   jumpSpeed: 8
   maxJumpTime: 0.4
   groundCheck: {fileID: 1943280888}
