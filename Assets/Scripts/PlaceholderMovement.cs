@@ -14,13 +14,20 @@ public class PlaceholderMovement : MonoBehaviour
     private Vector2 currentVelocity;
     private float deltaX;
 
-    // Variables for dashing, air dashing and double jumping
+    // Variables for dashing
     [SerializeField] private float dashMultiplier;
     [SerializeField] private float maxBufferTime;
     private float dashBufferTime = 0;
     private bool horizontalBuffer;
     private bool dashBuffer;
     private bool isDashing;
+
+    // Variables for air dashes and double jump
+    [SerializeField] private uint maxAirCharges;
+    [SerializeField] private float airDashSpeed;
+    [SerializeField] private float timeToDoubleJump;
+    private uint airCharges;
+
 
 
     // Variables for jumping
@@ -79,27 +86,55 @@ public class PlaceholderMovement : MonoBehaviour
             dashBufferTime = 0;
         }
 
-        currentVelocity.x = deltaX * speed;
+        if (IsGrounded())
+        {
+            currentVelocity.x = deltaX * speed;
+            airCharges = maxAirCharges;
+        }
 
-        // When dashing increase speed
-        if (isDashing) currentVelocity.x *= dashMultiplier;
+        // When dashing increase speed or airdash when in the air
+        if (isDashing)
+        {
+            if (IsGrounded()) currentVelocity.x *= dashMultiplier;
+            else if (airCharges > 0)
+            {
+                currentVelocity.x += airDashSpeed;
+                airCharges--;
+                dashBuffer = false;
+                horizontalBuffer = false;
+                isDashing = false;
+            }
+        }
 
         deltaY = Input.GetAxis("Vertical");
 
-        // While the player is grounded they can jump
-        if ((deltaY > 0) && IsGrounded())
+        // Player presses jump
+        if (deltaY > 0)
         {
-            currentVelocity.y = jumpSpeed;
-            rb.gravityScale = 1.0f;
-            jumpTime = Time.time;
+            // While the player is grounded they can jump
+            if (IsGrounded())
+            {
+                currentVelocity.y = jumpSpeed;
+                rb.gravityScale = 1.0f;
+                jumpTime = Time.time;
+            }
+            // Add a bit more to the jump if the player holds the jump button after jumping
+            else if ((Time.time - jumpTime) < maxJumpTime)
+            {
+                rb.gravityScale = 1.0f;
+            }
+            // Revert gravity to default
+            else rb.gravityScale = defaultGravity;
+
+            if ((Time.time - jumpTime) > (timeToDoubleJump) && airCharges > 0)
+            {
+                currentVelocity.y = jumpSpeed;
+                rb.gravityScale = 1.0f;
+                jumpTime = Time.time;
+                airCharges--;
+            }
         }
-        // Add a bit more to the jump if the player holds the jump button after jumping
-        else if ((deltaY > 0) && ((Time.time - jumpTime) < maxJumpTime))
-        {
-            rb.gravityScale = 1.0f;
-        }
-        // Revert gravity to default
-        else rb.gravityScale = defaultGravity;
+
 
         // Finally convert the currentVelocity into the velocity of the player
         rb.velocity = currentVelocity;
