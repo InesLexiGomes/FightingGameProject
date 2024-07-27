@@ -56,35 +56,7 @@ public class PlaceholderMovement : MonoBehaviour
         // Determines velocity based on a fixed speed value and the horizontal movement input
         deltaX = Input.GetAxis("Horizontal");
 
-        // Check if horizontal input is positive
-        if (Input.GetAxisRaw("Horizontal") > 0)
-        {
-            // Dash when both buffers are true
-            if (horizontalBuffer && dashBuffer) isDashing = true;
-
-            // Otherwise set first buffer to true and start timer
-            else
-            {
-                horizontalBuffer = true;
-                dashBufferTime = maxBufferTime;
-            }
-        }
-
-        // If horizontal input is 0 stop dashing and set second buffer to true
-        else if (Input.GetAxisRaw("Horizontal") == 0)
-        {
-            isDashing = false;
-            dashBuffer = true;
-        }
-
-        // Decrease time from Buffer by time that has passed
-        dashBufferTime -= Time.deltaTime;
-        if (dashBufferTime <= 0)
-        {
-            horizontalBuffer = false;
-            dashBuffer = false;
-            dashBufferTime = 0;
-        }
+        checkDash();
 
         if (IsGrounded())
         {
@@ -98,7 +70,7 @@ public class PlaceholderMovement : MonoBehaviour
             if (IsGrounded()) currentVelocity.x *= dashMultiplier;
             else if (airCharges > 0)
             {
-                currentVelocity.x += airDashSpeed;
+                currentVelocity.x = airDashSpeed;
                 airCharges--;
                 dashBuffer = false;
                 horizontalBuffer = false;
@@ -165,6 +137,39 @@ public class PlaceholderMovement : MonoBehaviour
         {
             Gizmos.color = Color.green;
             Gizmos.DrawSphere(groundCheck.position, groundCheckRadius);
+        }
+    }
+
+    private void checkDash()
+    {
+        // Check if horizontal input is positive
+        if (Input.GetAxisRaw("Horizontal") > 0)
+        {
+            // Dash when both buffers are true
+            if (horizontalBuffer && dashBuffer) isDashing = true;
+
+            // Otherwise set first buffer to true and start timer
+            else
+            {
+                horizontalBuffer = true;
+                dashBufferTime = maxBufferTime;
+            }
+        }
+
+        // If horizontal input is 0 stop dashing and set second buffer to true
+        else if (Input.GetAxisRaw("Horizontal") == 0)
+        {
+            isDashing = false;
+            dashBuffer = true;
+        }
+
+        // Decrease time from Buffer by time that has passed
+        dashBufferTime -= Time.deltaTime;
+        if (dashBufferTime <= 0)
+        {
+            horizontalBuffer = false;
+            dashBuffer = false;
+            dashBufferTime = 0;
         }
     }
 }
