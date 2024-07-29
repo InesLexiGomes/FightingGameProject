@@ -657,7 +657,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2.14, z: -4.71}
+  m_LocalPosition: {x: 0, y: 2.3, z: -5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2289,6 +2289,7 @@ GameObject:
   - component: {fileID: 1536233030}
   - component: {fileID: 1536233029}
   - component: {fileID: 1536233032}
+  - component: {fileID: 1536233033}
   - component: {fileID: 1536233031}
   m_Layer: 3
   m_Name: Capsule
@@ -2447,6 +2448,18 @@ MonoBehaviour:
   groundCheckLayers:
     serializedVersion: 2
     m_Bits: 1
+--- !u!114 &1536233033
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1536233023}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 033899302fcc9294f8e347a06147ba0b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1639149115
 GameObject:
   m_ObjectHideFlags: 0
@@ -2601,7 +2614,7 @@ Canvas:
   serializedVersion: 3
   m_RenderMode: 1
   m_Camera: {fileID: 330585545}
-  m_PlaneDistance: 100
+  m_PlaneDistance: 5
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
   m_OverrideSorting: 0
