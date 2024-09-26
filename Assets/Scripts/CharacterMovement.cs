@@ -4,9 +4,10 @@ using UnityEngine;
 
 public class CharacterMovement : MonoBehaviour
 {
-    // General variables
+    // General
     [SerializeField] private int defaultGravity;
     private Vector2 currentVelocity;
+    private InputManager inputManager;
     private Rigidbody2D rb;
     private Animator ani;
 
@@ -14,7 +15,7 @@ public class CharacterMovement : MonoBehaviour
     [SerializeField] private uint forwardSpeed;
     [SerializeField] private uint backwardSpeed;
     private float deltaX;
-    private int isFlipped;
+    private bool isFlipped;
 
     // Jumping
     [SerializeField] private uint jumpingSpeed;
@@ -27,10 +28,11 @@ public class CharacterMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        inputManager = GetComponent<InputManager>();
         rb = GetComponent<Rigidbody2D>();
         ani = GetComponent<Animator>();
 
-        isFlipped = 1;
+        isFlipped = false;
     }
 
     // Update is called once per frame
@@ -40,38 +42,44 @@ public class CharacterMovement : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.F))
         {
-            if (isFlipped > 0) transform.rotation = Quaternion.Euler(0, 180, 0);
-            else transform.rotation = Quaternion.Euler(0, 0, 0);
-            isFlipped = isFlipped * -1;
+            if (!isFlipped)
+            {
+                transform.rotation = Quaternion.Euler(0, 180, 0);
+                isFlipped = true;
+            }
+            else
+            {
+                transform.rotation = Quaternion.Euler(0, 0, 0);
+                isFlipped = false;
+            }
         }
 
         deltaX = Input.GetAxisRaw("Horizontal");
-        if (isFlipped < 0) deltaX = -deltaX;
 
         if (IsGrounded())
         {
             switch ((deltaX, Input.GetAxisRaw("Vertical")))
             {
                 case ( > 0, 0):
-                    FWalk();
+                    RWalk();
                     break;
                 case ( < 0, 0):
-                    BWalk();
+                    LWalk();
                     break;
                 case (0, > 0):
                     Jump();
                     break;
                 case ( > 0, > 0):
-                    FJump();
+                    Jump();
                     break;
                 case ( < 0, > 0):
-                    BJump();
+                    Jump();
                     break;
                 case (0, < 0):
                     Crouch();
                     break;
                 case ( < 0, < 0):
-                    BCrouch();
+                    Crouch();
                     break;
                 default:
                     Idle();
@@ -97,16 +105,34 @@ public class CharacterMovement : MonoBehaviour
     {
         
     }
-    private void FWalk()
+    private void RWalk()
     {
-        currentVelocity.x = forwardSpeed * isFlipped;
-        Debug.Log("Walking Forward.");
+        if (!isFlipped)
+        {
+            currentVelocity.x = forwardSpeed;
+            Debug.Log("Walking Forward.");
+        }
+        else
+        {
+            currentVelocity.x = backwardSpeed;
+            Debug.Log("Walking Backwards.");
+            Debug.Log("Blocking High.");
+        }
     }
-    private void BWalk()
+    private void LWalk()
     {
-        currentVelocity.x = -backwardSpeed * isFlipped;
-        Debug.Log("Walking Backwards.");
-        Debug.Log("Blocking High.");
+        if (!isFlipped)
+        {
+            currentVelocity.x = -backwardSpeed;
+            Debug.Log("Walking Backwards.");
+            Debug.Log("Blocking High.");
+        }
+        else
+        {
+            currentVelocity.x = -forwardSpeed;
+            Debug.Log("Walking Forward.");
+        }
+        
     }
     private void Dash()
     {
@@ -120,29 +146,54 @@ public class CharacterMovement : MonoBehaviour
     {
         currentVelocity.y = jumpingSpeed;
         Debug.Log("Jumping Up.");
-    }
-    private void FJump()
-    {
-        currentVelocity.y = jumpingSpeed;
-        currentVelocity.x = forwardSpeed * isFlipped / 2;
-        Debug.Log("Jumping Forward.");
-    }
-    private void BJump()
-    {
-        currentVelocity.y = jumpingSpeed;
-        currentVelocity.x = -backwardSpeed * isFlipped / 2;
-        Debug.Log("Jumping Backwards.");
-    }
-    private void Crouch()
-    {
-        Debug.Log("Crouching.");
-    }
-    private void BCrouch()
-    {
-        Debug.Log("Crouching.");
-        Debug.Log("Blocking Low");
+
+        //if (inputManager.playerControlls.Player.Right.triggered)
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            if (!isFlipped)
+            {
+                currentVelocity.x = forwardSpeed / 2;
+                Debug.Log("Jumping Forward.");
+            }
+            else
+            {
+                currentVelocity.x = backwardSpeed / 2;
+                Debug.Log("Jumping Backwards.");
+            }
+        }
+        //else if (inputManager.playerControlls.Player.Left.triggered)
+            else if (Input.GetKeyDown(KeyCode.A))
+
+            {
+                if (!isFlipped)
+            {
+                currentVelocity.y = jumpingSpeed;
+                currentVelocity.x = -backwardSpeed / 2;
+                Debug.Log("Jumping Backwards.");
+            }
+            else
+            {
+                currentVelocity.y = jumpingSpeed;
+                currentVelocity.x = -forwardSpeed / 2;
+                Debug.Log("Jumping Forward.");
+            }
+        }
     }
 
+    private void Crouch()
+    {
+        //Debug.Log("Crouching.");
+        //if (inputManager.playerControlls.Player.Left.triggered && !isFlipped)
+        if (Input.GetKeyDown(KeyCode.A) && !isFlipped)
+        {
+            Debug.Log("Blocking Low");
+        }
+        //else if (inputManager.playerControlls.Player.Right.triggered && isFlipped)
+        else if (Input.GetKeyDown(KeyCode.D) && isFlipped)
+        {
+            Debug.Log("Blocking Low");
+        }
+    }
 
     private void OnDrawGizmosSelected()
     {
