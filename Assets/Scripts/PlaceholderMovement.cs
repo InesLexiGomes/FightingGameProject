@@ -51,7 +51,7 @@ public class PlaceholderMovement : MonoBehaviour
     private void Update()
     {
         // sets currentVelocity to the velocity of the player at that instant as a "default"
-        currentVelocity = rb.velocity;
+        currentVelocity = rb.linearVelocity;
 
         // Determines velocity based on a fixed speed value and the horizontal movement input
         deltaX = Input.GetAxis("Horizontal");
@@ -109,7 +109,7 @@ public class PlaceholderMovement : MonoBehaviour
 
 
         // Finally convert the currentVelocity into the velocity of the player
-        rb.velocity = currentVelocity;
+        rb.linearVelocity = currentVelocity;
 
         // When walking backwards flip
         //if (rb.velocity.x < 0) transform.rotation = Quaternion.Euler(0, 180, 0);

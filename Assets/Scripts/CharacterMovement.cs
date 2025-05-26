@@ -7,7 +7,6 @@ public class CharacterMovement : MonoBehaviour
     // General
     [SerializeField] private int defaultGravity;
     private Vector2 currentVelocity;
-    private InputManager inputManager;
     private Rigidbody2D rb;
     private Animator ani;
 
@@ -25,10 +24,26 @@ public class CharacterMovement : MonoBehaviour
     [SerializeField] private float groundCheckRadius;
     [SerializeField] private LayerMask groundCheckLayers;
 
+    public PlayerControlls playerControlls { get; private set; }
+
+    private void Awake()
+    {
+        playerControlls = new PlayerControlls();
+    }
+
+    private void OnEnable()
+    {
+        playerControlls.Enable();
+    }
+
+    private void OnDisable()
+    {
+        playerControlls.Disable();
+    }
+
     // Start is called before the first frame update
     void Start()
     {
-        inputManager = GetComponent<InputManager>();
         rb = GetComponent<Rigidbody2D>();
         ani = GetComponent<Animator>();
 
@@ -38,7 +53,7 @@ public class CharacterMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        currentVelocity = rb.velocity;
+        currentVelocity = rb.linearVelocity;
 
         if (Input.GetKeyDown(KeyCode.F))
         {
@@ -86,7 +101,7 @@ public class CharacterMovement : MonoBehaviour
                     break;
             }
 
-            rb.velocity = currentVelocity;
+            rb.linearVelocity = currentVelocity;
         }
     }
 
@@ -182,7 +197,8 @@ public class CharacterMovement : MonoBehaviour
 
     private void Crouch()
     {
-        //Debug.Log("Crouching.");
+        ani.SetBool("Crouching", Input.GetButtonDown("Heavy Slash"));
+        Debug.Log("Crouching.");
         //if (inputManager.playerControlls.Player.Left.triggered && !isFlipped)
         if (Input.GetKeyDown(KeyCode.A) && !isFlipped)
         {
