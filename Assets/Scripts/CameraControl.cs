@@ -5,7 +5,6 @@ public class CameraControl : MonoBehaviour
     [SerializeField] private GameObject p1;
     [SerializeField] private GameObject p2;
 
-    [SerializeField] private GameObject stagecollisions;
     [SerializeField] private GameObject rotationCenter;
 
     [SerializeField] private float cameraPanOffset;
@@ -22,12 +21,15 @@ public class CameraControl : MonoBehaviour
 
     private Camera cam;
 
+    private Vector3 targetCamPosition;
+
     private void Start()
     {
         cam = GetComponent<Camera>();
 
         cam.fieldOfView = defaultFOV;
-        gameObject.transform.localPosition = new Vector3 (0, defaultHeight, defaultDistance);
+        gameObject.transform.position = new Vector3 (0, defaultHeight, defaultDistance);
+        targetCamPosition = transform.position;
     }
 
     private void Update()
@@ -36,27 +38,26 @@ public class CameraControl : MonoBehaviour
         ChangeCameraFOV();
     }
 
+    private void FixedUpdate()
+    {
+        StageRotation();
+    }
+
     private void DoCameraBox()
     {
         float characterCenter = (p1.transform.position.x + p2.transform.position.x)/2;
 
-        Vector3 targetPosition = transform.position;
-        Vector3 stageCollisionPosition = stagecollisions.transform.position;
-        Vector3 rotationCenterPosition = rotationCenter.transform.position;
-
-        if (Mathf.Abs(targetPosition.x - characterCenter) > cameraPanOffset)
+        if (Mathf.Abs(targetCamPosition.x - characterCenter) > cameraPanOffset)
         {
-            targetPosition.x = characterCenter;
+            targetCamPosition.x = Mathf.Lerp (targetCamPosition.x, characterCenter, Time.deltaTime * panningSpeed);
         }
 
-        transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * panningSpeed);
-        
-        stageCollisionPosition.x = transform.position.x;
-        stagecollisions.transform.position = stageCollisionPosition;
-        
-        rotationCenterPosition.x = transform.position.x;
-        rotationCenter.transform.position = rotationCenterPosition;
-        rotationCenter.transform.rotation = Quaternion.Euler(0, stageCollisionPosition.x / stageCollisionPosition.z, 0);
+        transform.position = Vector3.Lerp(transform.position, targetCamPosition, Time.deltaTime * panningSpeed);
+    }
+
+    private void StageRotation()
+    {
+        rotationCenter.transform.rotation = Quaternion.Euler(0, transform.position.x, 0);
     }
 
 
@@ -66,20 +67,20 @@ public class CameraControl : MonoBehaviour
 
         if (zoomDistance > minZoomOutDistance)
         {
-            Vector3 currentCamPos = transform.localPosition;
+            Vector3 currentCamPos = transform.position;
 
             float targetDistance = defaultDistance + (zoomDistance - minZoomOutDistance) * distanceMultiplier;
-            currentCamPos.z = Mathf.Lerp(transform.localPosition.z, targetDistance, Time.deltaTime);
-            transform.localPosition = currentCamPos;
+            currentCamPos.z = Mathf.Lerp(transform.position.z, targetDistance, Time.deltaTime);
+            transform.position = currentCamPos;
 
             float targetFOV = defaultFOV + (zoomDistance - minZoomOutDistance) * fovMultiplier;
             cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, targetFOV, Time.deltaTime);
         }
         else
         {
-            Vector3 currentCamPos = transform.localPosition;
-            currentCamPos.z = Mathf.Lerp(transform.localPosition.z, defaultDistance, Time.deltaTime);
-            transform.localPosition = currentCamPos;
+            Vector3 currentCamPos = transform.position;
+            currentCamPos.z = Mathf.Lerp(transform.position.z, defaultDistance, Time.deltaTime);
+            transform.position = currentCamPos;
 
             cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, defaultFOV, Time.deltaTime);
         }
