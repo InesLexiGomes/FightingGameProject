@@ -7,7 +7,6 @@ public class CameraControl : MonoBehaviour
 
     [SerializeField] private GameObject rotationCenter;
 
-    [SerializeField] private float cameraPanOffset;
     [SerializeField] private float panningSpeed;
 
     [SerializeField] private float minZoomOutDistance;
@@ -22,6 +21,7 @@ public class CameraControl : MonoBehaviour
     private Camera cam;
 
     private Vector3 targetCamPosition;
+    private Vector3 targetStagePosition;
 
     private void Start()
     {
@@ -30,11 +30,12 @@ public class CameraControl : MonoBehaviour
         cam.fieldOfView = defaultFOV;
         gameObject.transform.position = new Vector3 (0, defaultHeight, defaultDistance);
         targetCamPosition = transform.position;
+        targetStagePosition = rotationCenter.transform.position;
     }
 
     private void Update()
     {
-        DoCameraBox();
+        DoCameraFollow();
         ChangeCameraFOV();
     }
 
@@ -43,21 +44,19 @@ public class CameraControl : MonoBehaviour
         StageRotation();
     }
 
-    private void DoCameraBox()
+    private void DoCameraFollow()
     {
-        float characterCenter = (p1.transform.position.x + p2.transform.position.x)/2;
+        targetCamPosition.x = Mathf.Lerp (targetCamPosition.x, (p1.transform.position.x + p2.transform.position.x) / 2, Time.deltaTime * panningSpeed);
 
-        if (Mathf.Abs(targetCamPosition.x - characterCenter) > cameraPanOffset)
-        {
-            targetCamPosition.x = Mathf.Lerp (targetCamPosition.x, characterCenter, Time.deltaTime * panningSpeed);
-        }
-
-        transform.position = Vector3.Lerp(transform.position, targetCamPosition, Time.deltaTime * panningSpeed);
+        transform.position = targetCamPosition;
     }
 
     private void StageRotation()
     {
         rotationCenter.transform.rotation = Quaternion.Euler(0, transform.position.x, 0);
+
+        targetStagePosition.x = targetCamPosition.x;
+        rotationCenter.transform.position = targetStagePosition;
     }
 
 
