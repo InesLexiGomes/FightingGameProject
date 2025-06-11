@@ -2,7 +2,8 @@ using UnityEngine;
 
 public class CameraControl : MonoBehaviour
 {
-    [SerializeField] private GameObject rotationCenter;
+    [SerializeField] private GameObject characterCollision;
+    [SerializeField] private GameObject stage;
 
     [SerializeField] private float panningSpeed;
 
@@ -12,10 +13,10 @@ public class CameraControl : MonoBehaviour
     [SerializeField] private float defaultHeight;
     [SerializeField] private float defaultFOV;
 
-    [SerializeField] private float distanceMultiplier;
     [SerializeField] private float fovMultiplier;
 
     private Vector3 targetPosition;
+    private Vector3 targetCollisionPosition;
     private Vector3 targetStagePosition;
 
     private CharacterMovement[] players; 
@@ -32,18 +33,19 @@ public class CameraControl : MonoBehaviour
 
         gameObject.transform.position = new Vector3 (0, defaultHeight, defaultDistance);
         targetPosition = transform.position;
-        targetStagePosition = rotationCenter.transform.position;
+        targetStagePosition = characterCollision.transform.position;
+        targetStagePosition = stage.transform.position;
     }
 
     private void Update()
     {
-        DoCameraFollow();
         ChangeCameraFOV();
     }
 
     private void FixedUpdate()
     {
-        StageRotation();
+        DoCameraFollow();
+        StageManagement();
     }
 
     private void DoCameraFollow()
@@ -54,14 +56,16 @@ public class CameraControl : MonoBehaviour
         transform.position = targetPosition;
     }
 
-    private void StageRotation()
+    private void StageManagement()
     {
-        rotationCenter.transform.rotation = Quaternion.Euler(0, transform.position.x, 0);
+        stage.transform.rotation = Quaternion.Euler(0, transform.position.x, 0);
 
         targetStagePosition.x = targetPosition.x;
-        rotationCenter.transform.position = targetStagePosition;
-    }
+        stage.transform.position = targetStagePosition;
 
+        targetCollisionPosition.x = targetPosition.x;
+        characterCollision.transform.position = targetCollisionPosition;
+    }
 
     private void ChangeCameraFOV()
     {
@@ -69,22 +73,12 @@ public class CameraControl : MonoBehaviour
 
         if (zoomDistance > minZoomOutDistance)
         {
-            Vector3 currentCamPos = transform.position;
-
-            float targetDistance = defaultDistance + (zoomDistance - minZoomOutDistance) * distanceMultiplier;
-            currentCamPos.z = Mathf.Lerp(transform.position.z, targetDistance, Time.deltaTime);
-            transform.position = currentCamPos;
-
             float targetFOV = defaultFOV + (zoomDistance - minZoomOutDistance) * fovMultiplier;
             foreach(Camera cam in cameras)
                 cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, targetFOV, Time.deltaTime);
         }
         else
         {
-            Vector3 currentCamPos = transform.position;
-            currentCamPos.z = Mathf.Lerp(transform.position.z, defaultDistance, Time.deltaTime);
-            transform.position = currentCamPos;
-
             foreach(Camera cam in cameras)
                 cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, defaultFOV, Time.deltaTime);
         }
