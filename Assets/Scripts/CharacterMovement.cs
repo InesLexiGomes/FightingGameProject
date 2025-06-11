@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
-public class CharacterMovement : MonoBehaviour
+public class CharacterMovement : NetworkBehaviour
 {
     // General
     [SerializeField] private int defaultGravity;

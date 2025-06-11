@@ -2,9 +2,6 @@ using UnityEngine;
 
 public class CameraControl : MonoBehaviour
 {
-    [SerializeField] private GameObject p1;
-    [SerializeField] private GameObject p2;
-
     [SerializeField] private GameObject rotationCenter;
 
     [SerializeField] private float panningSpeed;
@@ -18,18 +15,23 @@ public class CameraControl : MonoBehaviour
     [SerializeField] private float distanceMultiplier;
     [SerializeField] private float fovMultiplier;
 
-    private Camera cam;
-
-    private Vector3 targetCamPosition;
+    private Vector3 targetPosition;
     private Vector3 targetStagePosition;
+
+    private CharacterMovement[] players; 
+    private Camera[] cameras;
 
     private void Start()
     {
-        cam = GetComponent<Camera>();
+        players = FindObjectsByType<CharacterMovement>(FindObjectsSortMode.None);
 
-        cam.fieldOfView = defaultFOV;
+        cameras = FindObjectsByType<Camera>(FindObjectsSortMode.None);
+
+        foreach (Camera cam in cameras)
+            cam.fieldOfView = defaultFOV;
+
         gameObject.transform.position = new Vector3 (0, defaultHeight, defaultDistance);
-        targetCamPosition = transform.position;
+        targetPosition = transform.position;
         targetStagePosition = rotationCenter.transform.position;
     }
 
@@ -46,23 +48,24 @@ public class CameraControl : MonoBehaviour
 
     private void DoCameraFollow()
     {
-        targetCamPosition.x = Mathf.Lerp (targetCamPosition.x, (p1.transform.position.x + p2.transform.position.x) / 2, Time.deltaTime * panningSpeed);
+        targetPosition.x = Mathf.Lerp (targetPosition.x, (players[0].transform.position.x + players[1].transform.position.x) 
+            / 2, Time.deltaTime * panningSpeed);
 
-        transform.position = targetCamPosition;
+        transform.position = targetPosition;
     }
 
     private void StageRotation()
     {
         rotationCenter.transform.rotation = Quaternion.Euler(0, transform.position.x, 0);
 
-        targetStagePosition.x = targetCamPosition.x;
+        targetStagePosition.x = targetPosition.x;
         rotationCenter.transform.position = targetStagePosition;
     }
 
 
     private void ChangeCameraFOV()
     {
-        float zoomDistance = (p1.transform.position - p2.transform.position).magnitude;
+        float zoomDistance = (players[0].transform.position - players[1].transform.position).magnitude;
 
         if (zoomDistance > minZoomOutDistance)
         {
@@ -73,7 +76,8 @@ public class CameraControl : MonoBehaviour
             transform.position = currentCamPos;
 
             float targetFOV = defaultFOV + (zoomDistance - minZoomOutDistance) * fovMultiplier;
-            cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, targetFOV, Time.deltaTime);
+            foreach(Camera cam in cameras)
+                cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, targetFOV, Time.deltaTime);
         }
         else
         {
@@ -81,7 +85,8 @@ public class CameraControl : MonoBehaviour
             currentCamPos.z = Mathf.Lerp(transform.position.z, defaultDistance, Time.deltaTime);
             transform.position = currentCamPos;
 
-            cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, defaultFOV, Time.deltaTime);
+            foreach(Camera cam in cameras)
+                cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, defaultFOV, Time.deltaTime);
         }
     }
 }
